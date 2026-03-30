@@ -7,6 +7,7 @@ import DeanDashboard from './pages/DeanDashboard';
 import HodDashboard from './pages/HodDashboard';
 import MentorDashboard from './pages/MentorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
+import Assessment from './pages/Assessment';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user } = useAuth();
@@ -49,6 +50,11 @@ function AppRoutes() {
       <Route path="/student" element={
         <ProtectedRoute allowedRoles={['student']}>
           <StudentDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/assessment" element={
+        <ProtectedRoute allowedRoles={['student']}>
+          <Assessment />
         </ProtectedRoute>
       } />
       <Route path="*" element={<Navigate to="/" replace />} />
