@@ -9,6 +9,9 @@
   --error: #ef4444;
 }
 
+
+
+
 body {
   background-color: var(--bg-dark);
   color: var(--text-main);

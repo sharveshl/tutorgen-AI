@@ -11,15 +11,8 @@ import Assessment from './pages/Assessment';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user } = useAuth();
-  
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
-  
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />; // Or to a 'Not Authorized' page
-  }
-  
+  if (!user) return <Navigate to="/" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
   return children;
 }
 
