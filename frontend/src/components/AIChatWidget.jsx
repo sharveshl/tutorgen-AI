@@ -1,6 +1,7 @@
 // src/components/AIChatWidget.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import axios from 'axios';
 
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +17,7 @@ export default function AIChatWidget() {
     }
   }, [messages, isOpen]);
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
@@ -25,13 +26,18 @@ export default function AIChatWidget() {
     setMessages(newMessages);
     setInputMessage('');
 
-    // Mock AI Response
-    setTimeout(() => {
+    try {
+      const { data } = await axios.post('/student/chat', { message: inputMessage });
       setMessages(prev => [...prev, { 
         role: 'ai', 
-        text: 'That is a great question. In Python, you can achieve that by using a list comprehension or a standard for-loop depending on your performance needs.'
+        text: data.reply
       }]);
-    }, 1000);
+    } catch (error) {
+      setMessages(prev => [...prev, { 
+        role: 'ai', 
+        text: 'Sorry, I am having trouble connecting to the server.'
+      }]);
+    }
   };
 
   return (

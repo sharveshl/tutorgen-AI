@@ -1,32 +1,47 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // { id: 1, name: 'Admin', role: 'super_admin' }
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Configure axios base
+  axios.defaults.baseURL = 'http://localhost:5000/api';
+
+  useEffect(() => {
+    // Check if token exists on load
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      setUser(parsed);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
+    }
+    setLoading(false);
+  }, []);
 
   const login = async (email, password) => {
-    // Mock login logic based on roles
-    if (email.includes('super')) {
-      setUser({ id: 1, name: 'Super Admin', role: 'super_admin' });
-    } else if (email.includes('dean')) {
-      setUser({ id: 2, name: 'Dean Smith', role: 'dean' });
-    } else if (email.includes('hod')) {
-      setUser({ id: 3, name: 'HOD Johnson', role: 'hod' });
-    } else if (email.includes('mentor')) {
-      setUser({ id: 4, name: 'Mentor Davis', role: 'mentor' });
-    } else if (email.includes('student')) {
-      setUser({ id: 5, name: 'Student Alex', role: 'student' });
-    } else {
-      throw new Error('Invalid credentials');
+    try {
+      const { data } = await axios.post('/auth/login', { email, password });
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+      return data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
   };
+
+  if (loading) return null;
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

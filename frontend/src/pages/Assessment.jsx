@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Maximize, ShieldAlert, CheckCircle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Assessment() {
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -30,13 +31,31 @@ export default function Assessment() {
   };
 
   const handleSubmit = async () => {
-    setSubmitted(true);
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
+    try {
+      await axios.post('/student/assessment/submit', { solution });
+      setSubmitted(true);
+      
+      // Force exit full screen if exists
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+      
+      // Update local storage user manually to refresh stats seamlessly
+      const rawUser = localStorage.getItem('user');
+      if(rawUser) {
+         let parsed = JSON.parse(rawUser);
+         // Simulate refresh by forcing a reload next time user hits dashboard or pinging login again.
+         // Real app would fetch context again. This is a quick fix.
+      }
+      
+      setTimeout(() => {
+        window.location.href = '/student'; // Full reload to catch new data from context
+      }, 2000);
+      
+    } catch (err) {
+      console.error(err);
+      alert('Failed to submit assessment');
     }
-    setTimeout(() => {
-      navigate('/student');
-    }, 2000);
   };
 
   // Anti-Cheating Event Handlers

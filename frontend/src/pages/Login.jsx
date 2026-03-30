@@ -17,15 +17,14 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Mock logic: super admin -> dean -> hod -> mentor -> student
-      await login(email, password);
-      // Wait a moment purely for visual UX
+      const userResponse = await login(email, password);
+      const role = userResponse.role;
       setTimeout(() => {
-        if (email.includes('super')) navigate('/super-admin');
-        else if (email.includes('dean')) navigate('/dean');
-        else if (email.includes('hod')) navigate('/hod');
-        else if (email.includes('mentor')) navigate('/mentor');
-        else if (email.includes('student')) navigate('/student');
+        if (role === 'super_admin') navigate('/super-admin');
+        else if (role === 'dean') navigate('/dean');
+        else if (role === 'hod') navigate('/hod');
+        else if (role === 'mentor') navigate('/mentor');
+        else if (role === 'student') navigate('/student');
         else navigate('/');
       }, 500);
     } catch (err) {
@@ -66,13 +65,13 @@ export default function Login() {
                 required
               />
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Use \"super\", \"dean\", \"hod\", \"mentor\", or \"student\"</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Use your academic email address</p>
           </div>
 
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock style={{ position: 'absolute', top: '12px', left: '12px', color: 'var(--text-muted)' }} size={20} />
+              <Lock style={{ position: 'absolute', top: '12px', left: '10px', color: 'var(--text-muted)' }} size={20} />
               <input
                 type="password"
                 className="glass-input"
