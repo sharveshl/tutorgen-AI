@@ -3,15 +3,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -29,12 +26,12 @@ export const loginUser = async (req, res) => {
         strengths: user.strengths,
         weaknesses: user.weaknesses,
         feedback: user.feedback,
+        cpProfiles: user.cpProfiles,
         token: generateToken(user._id),
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });
     }
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
