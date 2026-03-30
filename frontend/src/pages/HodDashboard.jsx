@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Layers, PlusCircle, Calendar, Mail, User, CheckCircle2, BarChart3, Database } from 'lucide-react';
+import React, { useState } from 'react';
+import { Layers, PlusCircle, Calendar, Mail, User, CheckCircle2, BarChart3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import StatCard from '../components/StatCard';
+import HierarchyExplorer from '../components/HierarchyExplorer';
 import axios from 'axios';
 
 export default function HodDashboard() {
@@ -10,15 +10,7 @@ export default function HodDashboard() {
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('stats');
-  
-  const [hierarchyData, setHierarchyData] = useState([]);
-
-  useEffect(() => {
-    if (activeTab === 'drilldown') {
-      axios.get('/users/hierarchy').then(res => setHierarchyData(res.data.children)).catch(console.error);
-    }
-  }, [activeTab]);
+  const [activeTab, setActiveTab] = useState('hierarchy');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,6 +31,14 @@ export default function HodDashboard() {
     }
   };
 
+  const tabStyle = (tab) => ({
+    width: 'auto',
+    background: activeTab === tab ? 'var(--primary)' : 'transparent',
+    color: activeTab === tab ? 'white' : 'var(--text-muted)',
+    border: 'none',
+    padding: '8px 20px',
+  });
+
   return (
     <div className="dashboard-container animate-fade-in">
       <header className="dashboard-header">
@@ -55,36 +55,17 @@ export default function HodDashboard() {
         </div>
       </header>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
-        <button className={`glass-button ${activeTab === 'stats' ? '' : 'hover-bg-glass'}`} style={{ width: 'auto', background: activeTab === 'stats' ? 'var(--primary)' : 'transparent', color: activeTab === 'stats' ? 'white' : 'var(--text-muted)', border: 'none' }} onClick={() => setActiveTab('stats')}>Department Stats</button>
-        <button className={`glass-button ${activeTab === 'drilldown' ? '' : 'hover-bg-glass'}`} style={{ width: 'auto', background: activeTab === 'drilldown' ? 'var(--primary)' : 'transparent', color: activeTab === 'drilldown' ? 'white' : 'var(--text-muted)', border: 'none' }} onClick={() => setActiveTab('drilldown')}>Hierarchy Explorer</button>
-        <button className={`glass-button ${activeTab === 'create' ? '' : 'hover-bg-glass'}`} style={{ width: 'auto', background: activeTab === 'create' ? 'var(--primary)' : 'transparent', color: activeTab === 'create' ? 'white' : 'var(--text-muted)', border: 'none' }} onClick={() => setActiveTab('create')}>Create Account</button>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem', flexWrap: 'wrap' }}>
+        <button className="glass-button" style={tabStyle('hierarchy')} onClick={() => setActiveTab('hierarchy')}>Mentor → Students</button>
+        <button className="glass-button" style={tabStyle('create')} onClick={() => setActiveTab('create')}>Create Mentor</button>
       </div>
 
-      {activeTab === 'stats' && (
+      {activeTab === 'hierarchy' && (
         <div className="delay-100">
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Department Performance</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-            <StatCard title="Dept Students Enrolled" value={320} icon={<User size={24} />} color="#818cf8" />
-            <StatCard title="Dept Average Score" value="78%" progress={78} icon={<BarChart3 size={24} />} color="#34d399" />
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'drilldown' && (
-        <div className="delay-100">
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Mentor Roster</h2>
-          {hierarchyData.length === 0 ? <p style={{color: 'var(--text-muted)'}}>No Mentor accounts created yet.</p> : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-              {hierarchyData.map(mentor => (
-                <div key={mentor._id} className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid #34d399' }}>
-                  <h3 style={{ margin: '0 0 0.5rem 0' }}>{mentor.name}</h3>
-                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem' }}>Assigned Year: <strong style={{color: 'white'}}>{mentor.year}</strong></p>
-                  <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{mentor.email}</p>
-                </div>
-              ))}
-            </div>
-          )}
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <BarChart3 size={22} color="var(--primary)" /> Department Hierarchy
+          </h2>
+          <HierarchyExplorer />
         </div>
       )}
 
@@ -112,7 +93,7 @@ export default function HodDashboard() {
               </div>
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Studying Year Assignment</label>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Year Assignment</label>
               <div style={{ position: 'relative' }}>
                 <Calendar style={{ position: 'absolute', top: '12px', left: '12px', color: 'var(--text-muted)' }} size={20} />
                 <select name="year" className="glass-input" style={{ paddingLeft: '40px', appearance: 'none' }} required defaultValue="">

@@ -14,7 +14,6 @@ export default function SuperAdminDashboard() {
     e.preventDefault();
     setError('');
     const form = e.target;
-    
     try {
       await axios.post('/users/create', {
         name: form.name.value,
